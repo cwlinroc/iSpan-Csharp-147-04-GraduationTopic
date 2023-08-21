@@ -1,0 +1,447 @@
+﻿@model IEnumerable<MSIT147thGraduationTopic.Models.Dtos.CartItemDisplayDto>;
+@{
+    ViewData["Title"] = "訂單生成";
+    var coupons = ViewBag.Coupons as IEnumerable<MSIT147thGraduationTopic.Models.ViewModels.BuyPageCouponVM>;
+}
+
+
+<div class="container mt-5">
+    <div class="row">
+
+        <!-- 購買主頁 -->
+        <div class="col-xl-9 col-lg-6">
+            <!-- 進度條 -->
+            <div class="progress-box d-flex position-relative justify-content-between align-items-center">
+
+                <div class="progress position-absolute w-100" style="z-index: -1;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"></div>
+                </div>
+                <div class="progress-circle border border-4 border-danger" id="circle1">1</div>
+                <div class="progress-circle border border-4 border-danger" id="circle2">2</div>
+                <div class="progress-circle border border-4 border-white" id="circle3">3</div>
+                <div class="progress-circle border border-4 border-white" id="circle4">4</div>
+            </div>
+            <!-- 進度條end -->
+            <div class=" p-4 bg-white rounded shadow my-4 mx-3">
+                <form name="orderForm" method="post" enctype="application/x-www-form-urlencoded" class="needs-validation">
+                    <div class="order-page-container">
+                        <div class="order-page">
+
+                            <div class="order-page-single p-3" id="page1">
+                                <div class="d-flex flex-column h-100">
+                                    <h2 class="mb-5">基本聯絡訊息</h2>
+                                    <div class="form-group row mb-3">
+                                        <label for="inputName"
+                                               class="col-form-label col-lg-2 text-center">姓名</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" id="inputName" name="Name"
+                                                   value="@ViewBag.MemberName">
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">請輸入姓名</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        <label for="inputPhone"
+                                               class="col-form-label col-lg-2 text-center">連絡電話</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" id="inputPhone" name="Phone"
+                                                   value="@ViewBag.MemberPhone">
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">請輸入連絡電話</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        <label for="inputEmail"
+                                               class="col-form-label col-lg-2 text-center">Email</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" id="inputEmail" name="Email"
+                                                   value="@ViewBag.MemberEmail">
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">請輸入Email</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-auto row">
+                                        <div class="col-auto col-lg-3"></div>
+                                        <div class="col-12 col-lg-6 d-flex justify-content-between">
+                                            <a type="button" class="btn btn-outline-warning order-page-button text-nowrap me-2"
+                                               href="@Url.Content("~/cart")">回到購物車</a>
+                                            <button type="button" class="btn btn-danger order-page-button text-nowrap"
+                                                    id="nextPage2">
+                                                下一頁
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="order-page-single p-3" id="page2">
+
+                                <div class="d-flex flex-column h-100">
+                                    <h2 class="mb-5">取貨方式</h2>
+
+                                    <div class="form-group row mb-3">
+                                        <label for="inputAddress"
+                                               class="col-form-label col-lg-2 text-center">縣市</label>
+                                        <div class="col-lg-9">
+                                            <select class="form-select" id="inputCity" name="City">
+                                                <option selected hidden disabled value=0>--請選擇縣市--</option>
+                                            </select>
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">請選擇縣市</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row mb-3">
+                                        <label for="inputAddress"
+                                               class="col-form-label col-lg-2 text-center">地區</label>
+                                        <div class="col-lg-9">
+                                            <select class="form-select" id="inputDistrict" name="District">
+                                                <option selected hidden disabled value="0">--請選擇地區--</option>
+                                            </select>
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">請選擇地區</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row mb-3">
+                                        <label for="inputAddress"
+                                               class="col-form-label col-lg-2 text-center">寄送地址</label>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" id="inputAddress" name="Address"
+                                                   value="">
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback">請輸入地址</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+
+                                        <div class="">
+                                            <button type="button" class="ms-3 mt-4 btn btn-outline-warning" id="useMemberAddress">使用會員通訊地址</button>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="mt-auto row">
+                                        <div class="col-auto col-lg-3"></div>
+                                        <div class="col-12 col-lg-6 d-flex justify-content-between">
+                                            <button type="button" class="btn btn-danger order-page-button text-nowrap me-2"
+                                                    id="prevPage1">
+                                                上一頁
+                                            </button>
+                                            <button type="button" class="btn btn-danger order-page-button text-nowrap"
+                                                    id="nextPage3">
+                                                下一頁
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div class="order-page-single p-3" id="page3">
+
+                                <div class="d-flex flex-column h-100">
+                                    <h2 class="mb-5">付款方式</h2>
+
+                                    <div class="form-group row mb-3">
+                                        <label for="inputCoupons"
+                                               class="col-form-label col-lg-2 text-center">使用優惠卷</label>
+                                        <div class="col-lg-9">
+                                            <input type="hidden" name="CouponId" id="inputCouponId" />
+                                            <input type="text" class="form-control mb-2" name="CouponName" value="無" id="inputCoupons" disabled />
+                                            <button type="button" class="btn btn-warning" data-bs-toggle="modal"
+                                                    data-bs-target="#couponModal">
+                                                選擇優惠卷
+                                            </button>
+                                            <div class="valid-feedback"></div>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+
+                                        <label for="divPayment"
+                                               class="col-form-label col-lg-2 text-center">付款方式</label>
+                                        <div class="col-sm-8" id="divPayment">
+                                            <div class="form-check me-4">
+                                                <input class="form-check-input" type="radio" name="Payment"
+                                                       id="radioPayment1" value="1">
+                                                <label class="form-check-label" for="radioPayment1">
+                                                    銀行匯款
+                                                </label>
+                                            </div>
+                                            <div class="form-check me-4">
+                                                <input class="form-check-input" type="radio" name="Payment"
+                                                       id="radioPayment2" value="2">
+                                                <label class="form-check-label" for="radioPayment2">
+                                                    LinePay
+                                                </label>
+                                            </div>
+                                            <div class="form-check me-4">
+                                                <input class="form-check-input" type="radio" name="Payment"
+                                                       id="radioPayment3" value="3">
+                                                <label class="form-check-label" for="radioPayment3">
+                                                    Paypal
+                                                </label>
+                                                <div class="valid-feedback"></div>
+                                                <div class="invalid-feedback">請選擇付款方式</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-auto row">
+                                        <div class="col-auto col-lg-3"></div>
+                                        <div class="col-12 col-lg-6 d-flex justify-content-between">
+                                            <button type="button" class="btn btn-danger order-page-button text-nowrap me-2"
+                                                    id="prevPage2">
+                                                上一頁
+                                            </button>
+                                            <button type="button" class="btn btn-danger order-page-button text-nowrap"
+                                                    id="nextPage4">
+                                                下一頁
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+                            <div class="order-page-single p-3" id="page4">
+
+                                <div class="d-flex flex-column h-100">
+                                    <h2 class="mb-4">確認訂單資訊</h2>
+
+                                    <div class="row">
+                                        <div class="col-auto col-md-1"></div>
+                                        <div class="col-md-10">
+                                            <div class="mt-3 fs-4">
+                                                <p>姓名：<span id="outputName"></span></p>
+                                            </div>
+                                            <div class="mt-3 fs-4">
+                                                <p>電話：<span id="outputPhone"></span></p>
+                                            </div>
+                                            <div class="mt-3 fs-4">
+                                                <p>Email：<span id="outputEmail"></span></p>
+                                            </div>
+                                            <!--<div class="mt-3 fs-4">
+                                                <p>取貨方式：<span id="outputPickupMethod"></span></p>
+                                            </div>-->
+                                            <div class="mt-3 fs-4">
+                                                <p>縣市：<span id="outputCity"></span></p>
+                                            </div>
+                                            <div class="mt-3 fs-4">
+                                                <p>地區：<span id="outputDistrict"></span></p>
+                                            </div>
+                                            <div class="mt-3 fs-4">
+                                                <p>寄送地址：<span id="outputAddress"></span></p>
+                                            </div>
+                                            <div class="mt-3 fs-4">
+                                                <p>使用優惠卷：<span id="outputCoupon">無</span></p>
+                                            </div>
+                                            <div class="mt-3 fs-4">
+                                                <p>付款方式：<span id="outputPayment"></span></p>
+                                            </div>
+                                            <div class="mt-3 fs-4">
+                                                <p>付款總額：<span class="price-total">0</span></p>
+                                            </div>
+                                            <div class="form-group mb-5">
+                                                <label for="inputRemark" class="form-label fs-4">備註：</label>
+                                                <textarea class="form-control" id="inputRemark" name="Remark" style="height:100px;"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-auto row">
+                                        <div class="col-auto col-lg-3"></div>
+                                        <div class="col-12 col-lg-6 d-flex justify-content-between">
+                                            <button type="button" class="btn btn-danger order-page-button text-nowrap me-2"
+                                                    id="prevPage3">
+                                                上一頁
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger order-page-button text-nowrap"
+                                                    id="submitOrder">
+                                                送出訂單
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+        <!-- 購買主頁end -->
+
+
+
+        <diV class="col-xl-3 col-lg-6">
+            <!-- 右側訂單列表 -->
+            <div class="container p-4 bg-white rounded shadow mb-5">
+
+                <h2>訂單</h2>
+
+                <div id="orderlist-table">
+                    <table class="table text-center ">
+                        <thead>
+                            <tr>
+                                <!-- <th>商品</th>
+                                <th>價格</th> -->
+                            </tr>
+                        </thead>
+
+                        <tbody id="listBody">
+                            @foreach (var item in Model)
+                            {
+                                @*<tr>
+                            <td>@item.CartItemName x<span>@item.Quantity</span></td>
+                            <td>
+                            @if (item.DiscountPercentage < 100)
+                            {
+                            <div class="text-secondary" style="font-size:5px;">
+                            <del>$<span>@(item.CartItemPrice * item.Quantity)</span></del>
+                            </div>
+                            }
+                            <div class="text-danger">
+                            $<span class="price-sum">@(item.CartItemPrice * item.DiscountPercentage / 100 * item.Quantity)</span>
+                            </div>
+
+                            </td>
+                            </tr>*@
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+
+                <div class="mt-5">
+                    <hr>
+                    <div class="d-flex">
+                        <div class="ms-auto me-3" id="sideBarTotal">
+                            <span>金額總計:</span>
+                            <span class="mx-3 price-total text-danger">0</span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- 右側訂單列表end -->
+        </diV>
+    </div>
+</div>
+
+
+
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="couponModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">可使用優惠卷</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <table class="table" id="couponTable">
+                    <tbody>
+                        @foreach (var coupon in coupons)
+                        {
+                            <tr data-couponId="@coupon.CouponId">
+                                <td> <input type="checkbox" class="form-check-input"> </td>
+                                <td>@coupon.CouponName</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="modal-footer justify-content-between">
+                <div><button type="button" class="btn btn-outline-danger" id="btnDiscardCoupon" data-bs-dismiss="modal">不使用優惠卷</button></div>
+                <div><button type="button" class="btn btn-warning" id="btnChooseCoupon">選擇優惠卷</button></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts{
+    <script src="~/js/MyBootstrapValidator.js"></script>
+    <script src="~/js/buy/buypage.js" type="module">    </script>
+    <script>
+        const memberCity = "@(ViewBag.MemberCity ?? "")"
+        const memberDistrict = "@(ViewBag.MemberDistrict ?? "")"
+        const memberAddress = "@(ViewBag.MemberAddress ?? "")"
+    </script>
+
+
+    }
+
+@section Styles{
+    <style>
+        div.progress-circle {
+            color: white;
+            background-color: #f34764;
+            /* border: 3px solid var(--line-border-empty); */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            /* 讓數字置中對齊 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: border 0.5s linear;
+        }
+
+        .order-page-container {
+            position: relative;
+            min-height: 650px;
+            overflow: hidden;
+        }
+
+        .order-page {
+            position: absolute;
+            width: 400%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+            transition: left 0.3s linear;
+        }
+
+        .order-page-single {
+            width: 25%;
+            height: 100%;
+            overflow: auto;
+        }
+
+        .order-page-button {
+            width: 150px;
+        }
+
+        #orderlist-table {
+            max-height: 595px;
+            overflow: auto;
+        }
+
+    </style>
+    }
+

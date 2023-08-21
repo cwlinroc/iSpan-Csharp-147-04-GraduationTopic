@@ -1,0 +1,677 @@
+﻿@model string[]
+@{
+    ViewData["Title"] = "員工檢視";
+    Layout = "_BackstagePage";
+}
+
+<header class="container px-5 mt-5">
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">員工管理</li>
+            <li class="breadcrumb-item active" aria-current="page">員工檢視</li>
+        </ol>
+    </nav>
+</header>
+
+<div class="container px-5">
+    <div class="row gx-5">
+
+        <div class="col-xxl-9 col-lg-6">
+
+            <div class="contentbox bg-light rounded shadow p-2 mb-5">
+
+                <div class="p-4">
+                    <h2>員工檢視</h2>
+                    <div class="d-flex">
+                        <input type="text" id="query" name="query">
+                        <button type="button" id="queryButton">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tablebox">
+                    <table class="table table-light table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th class="ps-5" style="width:10rem">頭像</th>
+                                <th>姓名</th>
+                                <th>帳號名稱</th>
+                                <th>權限</th>
+                                <th style="width:5rem" class="text-center">修改</th>
+                                <th style="width:5rem" class="text-center">權限調整</th>
+                                <th style="width:5rem" class="text-center">刪除</th>
+                                <th style="width:3rem" class="text-center"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between px-4 pt-4">
+                    <button class="btn btn-primary shadow ms-auto me-2" id="btnAdd">新增員工</button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-xxl-3 col-lg-6">
+
+            <div class=" bg-light rounded shadow p-2 mb-4">
+
+                <h2 class="mt-4 ms-3">員工:<span id="displayTileName"></span></h2>
+                <figure class="p-4">
+                    <img src="" id="displayImage">
+                </figure>
+
+            </div>
+
+            <div class=" bg-light rounded shadow p-2 mb-5" id="data">
+                <table class="table">
+                    <thead>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-nowrap">姓名</td>
+                            <td id="displayName"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-nowrap">帳號名稱</td>
+                            <td id="displayAccount"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-nowrap">電話</td>
+                            <td id="displayPhone"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-nowrap">Email</td>
+                            <td id="displayEmail"></td>
+                        </tr>
+                        <tr>
+                            <td class="text-nowrap">權限</td>
+                            <td id="displayPermission"></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- MainModal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">title</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createAndEdit" name="createAndEdit" data-index="-1" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="name" class="col-form-label">姓名:</label>
+                        <input type="text" class="form-control" id="name" name="EmployeeName" required>
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">請輸入姓名</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="account" class="col-form-label">帳號名稱:</label>
+                        <input type="text" class="form-control" id="account" name="EmployeeAccount">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">請輸入帳號</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="col-form-label">密碼:</label>
+                        <input type="text" class="form-control" id="password" name="EmployeePassword">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">請輸入密碼</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="col-form-label">電話:</label>
+                        <input type="text" class="form-control" id="phone" name="EmployeePhone">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">請輸入電話</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="col-form-label">Email:</label>
+                        <input type="text" class="form-control" id="email" name="EmployeeEmail">
+                        <div class="valid-feedback"></div>
+                        <div class="invalid-feedback">請輸入Email</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="photo" class="col-form-label">頭像:</label>
+                        <div class="my-3" id="imagePreviewDiv">
+                            <img src="" id="imagePreview" />
+                        </div>
+                        <div class="input-group">
+                            <input type="file" class="form-control rounded-end" id="avatar" name="avatar">
+                            <button class="form-control btn border" type="button" id="deleteFile">x</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <!-- demo buttons -->
+            <div class="px-2">
+                <button class="btn btn-sm btn-outline-secondary mb-2" id="demoAddManager">demo新增經理</button>
+                <button class="btn btn-sm btn-outline-secondary mb-2" id="demoAddEmployee">demo新增員工</button>
+                <button class="btn btn-sm btn-outline-secondary mb-2" id="demoEditEmployee">demo修改員工</button>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary" id="btnSubmit">確認</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- PermissionModal -->
+<div class="modal fade " id="permissionModal" tabindex="-1" aria-labelledby="permissionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="permissionModalLabel">修改權限為</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-5">
+                <select class="form-select" id="selectPermission">
+                    <option selected disabled hidden>--選擇--</option>
+                    @foreach (var permission in Model)
+                    {
+                        <option value="@permission">@permission</option>
+                    }
+                </select>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary" id="btnChangePermission">確認</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+@section Scripts{
+    <script src="~/js/MyBootstrapValidator.js"></script>
+    <script>
+
+        //get Modal
+        const mainModal = new bootstrap.Modal(document.querySelector('#editModal'))
+        const permissionModal = new bootstrap.Modal(document.querySelector('#permissionModal'))
+        //員工資料
+        let employeeData
+        //抓取員工資料
+        getEmployees()
+        //新增員工按鈕
+        $('#btnAdd').click(changeToInsertForm)
+        //上傳圖片預覽
+        const inputAvatar = document.querySelector('#avatar')
+        inputAvatar.addEventListener('change', showOrHideImagePreview)
+        //取消上傳圖片預覽
+        $('#deleteFile').click(() => {
+            inputAvatar.value = null
+            showOrHideImagePreview()
+        })
+        //搜尋按鈕
+        $('#queryButton').click(e => getEmployees($('#query').val()))
+        //修改權限按鈕
+        $('#btnChangePermission').click(submitChangePermission)
+
+
+        /**functions**/
+
+        //inputfile 顯示或隱藏預覽
+        function showOrHideImagePreview() {
+            if (inputAvatar.files && inputAvatar.files[0]) {
+                const reader = new FileReader();
+
+                reader.addEventListener('load', event => {
+                    $('#imagePreview').attr('src', event.target.result)
+                    $('#imagePreviewDiv').css('display', 'block')
+                    $('#deleteFile').css('display', 'block')
+                    $('#avatar').removeClass('rounded-end')
+                })
+                reader.readAsDataURL(inputAvatar.files[0]);
+            }
+            else {
+                $('#imagePreviewDiv').css('display', 'none')
+                $('#deleteFile').css('display', 'none')
+                $('#avatar').addClass('rounded-end')
+            }
+        }
+
+        //Ajax 得到員工資料
+        async function getEmployees(query) {
+            showLoadingBox()
+            let str = ''
+            if (query) str = '/' + queryshow
+            const response = await fetch('@Url.Content("~/api/apiemployee")' + str)
+
+            if (!response.ok) return
+            const data = await response.json()
+
+            employeeData = data
+            displayEmployees()
+            hideLoadingBox()
+        }
+
+        //Ajax 新增員工
+        async function submitAdd() {
+            myValid.endtValidate()
+
+            if (!await createValidator()) return;
+
+            const formData = new FormData(document.createAndEdit)
+
+            showLoadingBox()
+            const response = await fetch('@Url.Content("~/api/apiemployee")', {
+                body: formData,
+                method: 'POST'
+            })
+
+            if (response.status == 400) {
+                console.log("輸入格式錯誤")
+            }
+            if (response.ok) {
+                const data = await response.json()
+                console.log(data)
+                getEmployees()
+                await Swal.fire(
+                    '輸入成功!',
+                    '員工資料已新增!',
+                    'success'
+                )
+                mainModal.hide()
+            }
+            hideLoadingBox()
+        }
+
+        //Ajax 修改員工
+        async function submitEdit() {
+            const formData = new FormData(document.createAndEdit)
+            const index = $('#createAndEdit').attr('data-index')
+            const id = employeeData[index].employeeId
+
+            showLoadingBox()
+            const response = await fetch(`@Url.Content("~/api/apiemployee")/${id}`, {
+                body: formData,
+                method: 'PUT'
+            })
+
+            if (response.status == 400) {
+                console.log("輸入格式錯誤")
+            }
+
+            if (response.ok) {
+                const data = await response.json()
+                console.log(data)
+                getEmployees()
+                //alert('修改成功')
+                await Swal.fire(
+                    '修改成功!',
+                    '員工資料已修改!',
+                    'success'
+                )
+                mainModal.hide()
+            }
+            hideLoadingBox()
+        }
+
+        //Ajax 修改員工權限
+        async function submitChangePermission() {
+
+            permissionModal.hide()
+
+            const confirm = await confirmWithPassword()
+            if (!confirm) return
+
+            const permission = $('#selectPermission').val()
+            const id = $('#selectPermission').attr('data-employeeId')
+
+            showLoadingBox()
+            const response = await fetch(`@Url.Content("~/api/apiemployee/permission")/${id}`, {
+                body: JSON.stringify({ 'permission': permission }),
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', },
+            })
+
+            if (response.status == 400) {
+                console.log("輸入格式錯誤")
+            }
+
+            if (response.ok) {
+                const data = await response.json()
+                console.log(data)
+                getEmployees()
+                //alert('修改成功')
+                await Swal.fire(
+                    '修改成功!',
+                    '員工權限已修改!',
+                    'success'
+                )
+            }
+            hideLoadingBox()
+        }
+
+
+        //TODO 不可刪管理員
+        //Ajax 刪除員工
+        async function deleteEmployee(event) {
+
+            if (!await validateRole('管理員')) return;
+
+            const formData = new FormData(document.createAndEdit)
+            const index = event.currentTarget.closest('tr').dataset.index
+            const id = employeeData[index].employeeId
+
+            if (id == 1) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: '錯誤',
+                    text: '無法刪除預設管理員',
+                })
+                return
+            }
+
+            const confirm = await confirmWithPassword()
+            if (!confirm) return
+
+            showLoadingBox()
+            const response = await fetch(`@Url.Content("~/api/apiemployee")/${id}`, { method: 'DELETE' })
+
+            if (response.status == 400) {
+                console.log("輸入格式錯誤")
+            }
+
+            if (response.ok) {
+                const data = await response.json()
+                console.log(data)
+                getEmployees()
+                //alert('刪除成功')
+                await Swal.fire(
+                    '刪除成功!',
+                    '該員工已刪除!',
+                    'success'
+                )
+                mainModal.hide()
+            }
+            hideLoadingBox()
+        }
+
+        //列出員工
+        function displayEmployees() {
+            const trs = employeeData.map((element, index) => {
+                const imageName = (element.avatarName) ? element.avatarName : '_employeeDefault.jpg'
+                return `<tr data-index="${index}" >
+                                                    <td class="ps-5"><img src="@Url.Content("~/uploads/employeeAvatar")/${imageName}" class="small-avatar"></td>
+                                                    <td>${element.employeeName}</td>
+                                                    <td>${element.employeeAccount}</td>
+                                                    <td>${element.permission}</td>
+                                                    <td  class="text-center"><button class="btn btn-primary edit-btn"><i class="fa-solid fa-pen-to-square"></i></button></td>
+                                                    <td  class="text-center"><button class="btn btn-danger permission-btn"><i class="fa-solid fa-pen-nib"></i></button></td>
+                                                    <td class="text-center"><button class="btn btn-danger delete-btn"><i class="fa-solid fa-trash"></i></button></td>
+                                                    <td></td>
+                                                    </tr>`
+            })
+            $('.tablebox').find('tbody').html(trs.join(''))
+            $('.tablebox').find('.edit-btn').click(changeToEditForm)
+            $('.tablebox').find('.delete-btn').click(deleteEmployee)
+            $('.tablebox').find('.permission-btn').click(showEditPermissionModal)
+            $('.tablebox').find('tbody').find('tr').click(displayEmployeeDataInRow)
+            displayEmployeeData(0)
+        }
+
+        //調整為新增表單
+        async function changeToInsertForm() {
+            if (!await validateRole('經理')) return;
+
+            const addForm = document.querySelector('#createAndEdit')
+            addForm.reset()
+            $('#account,#password').parent().css('display', 'block')
+            $('#editModalLabel').text('新增員工')
+            showOrHideImagePreview()
+            clearAllValidFeedBack()
+            $('#createAndEdit').attr('data-index', '-1')
+            showAddDemoButtons()
+            myValid.endtValidate()
+            mainModal.show()
+            $('#btnSubmit').off()
+            $('#btnSubmit').click(submitAdd)
+        }
+
+        //調整為修改表單
+        async function changeToEditForm(event) {
+            if (!await validateRole('經理')) return;
+
+            const editForm = document.querySelector('#createAndEdit')
+            editForm.reset()
+            $('#account,#password').parent().css('display', 'none')
+            $('#editModalLabel').text('修改員工資料')
+            showOrHideImagePreview()
+            clearAllValidFeedBack()
+            const index = event.currentTarget.closest('tr').dataset.index
+            $('#createAndEdit').attr('data-index', index)
+            $('#name').val(employeeData[index].employeeName)
+            $('#email').val(employeeData[index].employeeEmail)
+            $('#phone').val(employeeData[index].employeePhone)
+            showEditDemoButtons()
+            myValid.endtValidate()
+            mainModal.show()
+            $('#btnSubmit').off()
+            $('#btnSubmit').click(submitEdit)
+        }
+
+        //顯示點選tr的員工資料
+        function displayEmployeeDataInRow(event) {
+            const index = +event.currentTarget.dataset.index
+            displayEmployeeData(index)
+        }
+
+        //顯示第n筆員工資料
+        function displayEmployeeData(index) {
+            if (!employeeData.length) return
+            const imgName = (employeeData[index].avatarName) ? employeeData[index].avatarName : '_employeeDefault.jpg'
+
+            $('#displayName').text(employeeData[index].employeeName)
+            $('#displayAccount').text(employeeData[index].employeeAccount)
+            $('#displayPhone').text(employeeData[index].employeePhone)
+            $('#displayEmail').text(employeeData[index].employeeEmail)
+            $('#displayPermission').text(employeeData[index].permission)
+            $('#displayTileName').text(employeeData[index].employeeName)
+            $('#displayImage').attr('src', '@Url.Content("~/uploads/employeeAvatar/")' + imgName)
+        }
+
+        //彈出修改權限modal
+        async function showEditPermissionModal(event) {
+            if (!await validateRole('管理員')) return;
+
+            const index = +$(event.currentTarget).closest('tr').attr('data-index')
+            if (employeeData[index].employeeId == 1) {
+                await Swal.fire({
+                    icon: 'error',
+                    title: '錯誤',
+                    text: '無法更改預設管理員權限',
+                })
+                return
+            }
+
+            $('#selectPermission').val(employeeData[index].permission)
+                .attr('data-employeeId', employeeData[index].employeeId)
+            permissionModal.show()
+        }
+
+
+        //demos
+        $('#demoAddManager').click(e => {
+            $('#name').val('學姐')
+            $('#account').val('demoManager88')
+            $('#password').val('demoManager88')
+            $('#phone').val('0988336699')
+            $('#email').val('Manager@@whatever.com')
+        })
+
+        $('#demoAddEmployee').click(e => {
+            $('#name').val('新來的學弟')
+            $('#account').val('demoEmployee88')
+            $('#password').val('demoEmployee88')
+            $('#phone').val('0929224466')
+            $('#email').val('NewEmployee@@yahoo.com.tw')
+        })
+
+        $('#demoEditEmployee').click(e => {
+            $('#name').val('來了一陣子的學弟')
+            $('#phone').val('0933123456')
+            $('#email').val('NewEmployee@@gmail.com')
+        })
+
+        function showAddDemoButtons() {
+            $('#demoAddManager').css('display', 'none')
+            $('#demoAddEmployee').css('display', 'inline')
+            $('#demoEditEmployee').css('display', 'none')
+        }
+        function showEditDemoButtons() {
+            $('#demoAddManager').css('display', 'none')
+            $('#demoAddEmployee').css('display', 'none')
+            $('#demoEditEmployee').css('display', 'inline')
+        }
+
+        //// MyBootsrapValidator
+        //// 0. section最上面要引用  script src="~/js/MyBootstrapValidator.js"
+        //// 1. const myValid = new MyBootsrapValidator(表單element)
+        const myValid = new MyBootsrapValidator(document.querySelector('.needs-validation'))
+
+        //新增員工表單驗證
+        function createValidator() {
+            //// 2. myValid.validateFunction( 回傳bool的函式 ) //自訂判斷整個表單是否格式正確，正確回傳true
+            myValid.validateFunction(async () => {
+                const name = document.querySelector('#name')
+                const nameValid = Boolean(name.value)
+                //// 3. input元素.setValidate( 回傳bool的函式 , [錯誤訊息字串] )  //自訂判斷這個input是否格式正確，如果有輸入錯誤字串會更改顯示的錯誤訊息
+                //// ps:也可以使用 input元素.setValidate(...).setValidate(...).setValidate(...) 串接多個條件判斷  只要其中有錯誤就會顯示第一個錯的錯誤，包含錯誤信息
+                name.setValidate(() => nameValid)
+
+                const account = document.querySelector('#account')
+                const accountValid = !!account.value
+                const noneDuplicateAccount = !!account.value && !(await hasSameAccount(account.value))
+                account.setValidate(() => accountValid, "請輸入帳號").setValidate(() => noneDuplicateAccount, "已有重複的帳號")
+
+                const password = document.querySelector('#password')
+                const passwordValid = !!password.value
+                const passwordPatternValid = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{6,32}$/.test(password.value)
+                password.setValidate(() => passwordValid, '請輸入密碼').setValidate(() => passwordPatternValid, '密碼不符合格式(必須包含英文大小寫及數字)')
+
+                const phone = document.querySelector('#phone')
+                const phoneValid = !!phone.value
+                const phonePatternValid = /^09\d{8}$/.test(phone.value)
+                phone.setValidate(() => phoneValid)
+
+                const email = document.querySelector('#email')
+                const emailValid = !!email.value
+                const emailPatternValid = /^\w+@@\w+/.test(email.value)
+                email.setValidate(() => emailValid, '請輸入Email').setValidate(() => emailPatternValid, 'Email格式錯誤')
+                //// 要全部都正確，才能送回true確認表單正確
+                return nameValid && phoneValid && emailValid && passwordValid
+                    && accountValid && noneDuplicateAccount && passwordPatternValid && emailPatternValid
+            })
+            //// 4. myValid.startValidate() //開始驗證表單，放在送出的按鈕上做驗證，如果有錯會回傳false
+            return myValid.startValidate()
+        }
+
+        //修改員工表單驗證
+        function editValidator() {
+            myValid.validateFunction(() => {
+                const nameValid = !!$('#name').val()
+                document.querySelector('#name').setValidate(() => nameValid)
+                const phoneValid = !!$('#phone').val()
+                document.querySelector('#phone').setValidate(() => phoneValid)
+                const emailValid = !!$('#email').val()
+                document.querySelector('#email').setValidate(() => emailValid)
+                return nameValid && phoneValid && emailValid
+            })
+            return myValid.startValidate()
+        }
+
+        function clearAllValidFeedBack() {
+            //// 5. myValid.endtValidate() //結束驗證，順便清除顯示錯誤(如果送出表單後頁面會跳走，這個函式就用不到了)
+            myValid.endtValidate()
+        }
+
+        async function hasSameAccount(account) {
+            const response = await fetch(`${ROOT}/api/apiemployee/hassamenameaccount?account=${account}`)
+            return await response.json()
+        }
+
+
+    </script>
+}
+
+
+@section Styles{
+    <style>
+        .small-avatar{
+            height:50px;
+            width:50px;
+            object-fit:cover;
+        }
+
+        .contentbox {
+            height: 720px;
+            overflow: auto;
+        }
+
+
+        .tablebox {
+            height: 500px;
+            overflow: auto;
+        }
+
+            .tablebox td img {
+                height: 50px;
+            }
+
+            .tablebox td, th {
+                vertical-align: middle;
+            }
+
+        figure {
+            height: 250px;
+            text-align: center;
+        }
+
+            figure img {
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+        #data {
+            height: 345px;
+        }
+
+            #data td {
+                word-break: break-all;
+                max-width: 200px;
+            }
+
+        #deleteFile {
+            max-width: 50px;
+            display: none;
+        }
+
+        #imagePreview {
+            max-width: 250px;
+        }
+
+    </style>
+}
+

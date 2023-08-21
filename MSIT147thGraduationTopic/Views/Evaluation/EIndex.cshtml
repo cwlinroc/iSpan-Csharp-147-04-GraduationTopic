@@ -1,0 +1,207 @@
+﻿@model IEnumerable<MSIT147thGraduationTopic.Models.ViewModels.EvaluationVM>
+@{
+    ViewData["Title"] = "Index";
+    //var isUpdate = Model.Count(a => a.Score != 0) > 0 || Model.Count(a => a.comments != null) > 0;  //比對全部資料
+    var isUpdate = Model.Any(a => a.Score != 0) || Model.Any(a => a.comments != null);//比對到第一筆的資料
+
+}
+<!-- 引入 SweetAlert2 的样式文件 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.3/dist/sweetalert2.min.css">
+
+<!-- 引入 SweetAlert2 的 JavaScript 文件 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.3/dist/sweetalert2.all.min.js"></script>
+
+
+
+<div class="container">
+    <div class="row mt-3">
+        <div class="col-2"></div>
+        <div class="col-8 ">
+
+            @if (Model != null && Model.Count() > 0)
+            {
+                <div class="d-flex mt-3 ">
+                    <div class="ms-auto d-flex flex-column justify-content-end align-items-end ">
+                        <h5 id="OrderId">訂單編號:@ViewBag.OrderId</h5>
+                    </div>
+                </div>
+
+                <form id="evaluationForm" method="post" action=@(isUpdate?"/Evaluation/EIndex":"/Evaluation/EIndex" )>
+                    <input name="id" value="@ViewBag.OrderId" @*@(Model.FirstOrDefault().OrderId)*@ hidden>
+                    @for (int i = 0; i < Model.Count(); i++)
+                    {
+                        var item = Model.ElementAt(i);//ElementAt 將返回索引 n 的專案
+                        <div style="border-block-color:#FFDDAA;border-width: 2px">
+                            <div class="mt-4 d-flex align-items-center">
+                                <div class="d-flex rounded-3 px-1 " style="background-color:#FFDDAA">
+                                    <div class="mx-1 mt-2">
+                                        <h6 id="MerchandiseName_@(i)">@(item.MerchandiseName)</h6>
+                                        <input name="comments[@(i)].MerchandiseId" value="@(item.MerchandiseId)" hidden>
+                                    </div>
+                                    <div class="mt-2">
+                                        <h6 id="SpecName_@(i)"> @(item.SpecName)</h6>
+                                        <input name="comments[@(i)].SpecId" value="@(item.SpecId)" hidden>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex ms-auto float-end">
+                                    <div id="score_@(i)" name="Score" class="float-end mx-1 mt-3" itype="starDiv">
+                                        <input id="inputscore_@(i)" name="comments[@(i)].Score" value="@(item.Score)" hidden>
+                                        <img id="star@(i)_1" src=@(item.Score>=1?"/images/一星.png":"/images/空星.png") style="height:40px" />
+                                        <img id="star@(i)_2" src=@(item.Score>=2?"/images/二星.png":"/images/空星.png") style="height:40px" />
+                                        <img id="star@(i)_3" src=@(item.Score>=3?"/images/三星.png":"/images/空星.png") style="height:40px" />
+                                        <img id="star@(i)_4" src=@(item.Score>=4?"/images/四星.png":"/images/空星.png") style="height:40px" />
+                                        <img id="star@(i)_5" src=@(item.Score==5?"/images/五星.png":"/images/空星.png") style="height:40px" />   
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-floating mx-2 mt-2 mb-4">
+                                <textarea id="commentText_@(i)" name="comments[@(i)].Comment" class="form-control" placeholder="請輸入您的評價~" style="height: 100px">@(item.Comment)</textarea>
+                                <label for="floatingTextarea2">@(item.Comment)</label>
+                            </div>
+                        </div>
+                    }
+                    <div>
+                        @*<button id="send" @*type="submit"*@ @*class="btn btn-primary float-end mt-2 mx-1">@(isUpdate ?"修改":"送出")</button>*@
+                        @*<button id="return" class="btn btn-primary float-end mt-2 mx-1">返回</button> 使用這個會導致生成新評論區塊*@
+                        <input value="返回" class="btn btn-primary float-end mt-2 mx-1" type="button" onclick="window.location.href = '/Member/ShoppingHistory'">
+                        <input id="send" type="button" class="btn btn-primary float-end mt-2 mx-1" value="@(isUpdate ? "修改" : "送出")">
+                    </div>
+                </form>
+                
+
+            }
+            else
+            {
+                <text>
+                    <script>
+                        Swal.fire('此筆訂單目前查無資料');
+                    </script>
+                </text>
+            }
+        </div>
+
+        <div class="col-2"></div>
+    </div>
+</div>
+@section Scripts{
+
+    <script>
+
+        const starImages = [
+            "/images/空星.png",
+            "/images/一星.png",
+            "/images/二星.png",
+            "/images/三星.png",
+            "/images/四星.png",
+            "/images/五星.png",
+        ];
+
+        let stars = $('div[itype="starDiv"] > img');
+        let score = 0;
+        //if(score = 0)
+        //{
+        //console.log(stars)
+        stars.hover(
+            function () {
+                lightingStar($(this));
+            },
+            function () {
+                //console.log(this.parent().children());
+                $(this).parent().children().attr('src', starImages[0]);
+            }
+        );
+        //}
+
+
+        stars.click(function () {
+            score = $(this).attr('id').split('_')[1];
+            //console.log($(this).parent().find('input').attr('id'));
+            //若要改評分
+            if (score > 0) {
+                $(this).parent().children().attr('src', starImages[0]);
+                $(this).parent().children().bind('mouseenter').bind('mouseleave');
+                   
+                if (score === '5' ) {
+                    var clickedStarIndex = parseInt($(this).attr('id').split('_')[1]);
+                    if (clickedStarIndex===5){
+                        $(this).addClass('rotate-animation')
+                        // 使用 setTimeout 在旋轉一圈後移除效果
+                        setTimeout(() => {
+                            $(this).removeClass('rotate-animation');
+                        }, 600)
+                    }
+                }
+            }
+            //else{} 直接執行再次評分
+            lightingStar($(this));
+            $(this).parent().children().unbind('mouseenter').unbind('mouseleave');
+            //$(this).siblings("img").unbind('mouseenter').unbind('mouseleave');
+
+            $(this).parent().find('input').val(score);  //將score值放入input
+            //console.log($(this).parent().find('input').val());
+        })
+
+
+        let lightingStar = function (obj) {
+            let idArray = obj.attr('id').split('_');  //.split 字串分割
+            //console.log(idArray);
+            let index = idArray[1]; //第n顆星星
+            //console.log(index);
+            for (let i = 0; i <= index; i++) {
+                //stars.eq(i).attr('src', starImages[i + 1]);
+                $("#" + idArray[0] + "_" + i).attr('src', starImages[i]);
+            }
+        }
+    </script>
+    <script>
+        $("#send").click(function () {
+            //console.log($("[id^='inputscore_']").length);
+            let isAllHaveScore = true;
+            
+            $("[id^='inputscore_']").each(function (index, score) {
+               
+                console.log(score.value)
+                if (score.value == 0) {
+                    isAllHaveScore = false;
+                    return false;
+                }
+            });
+            if (isAllHaveScore) {
+                $("#evaluationForm").submit();
+            } else {
+                Swal.fire('還有商品未評分呦');
+            }
+        })
+        //$("#return").click(function () {
+        //    href = "/Member/ShoppingHistory"
+        //})
+
+    </script>
+    <script>
+        var star = $("[id^='inputscore_']");
+
+        star.each(function (index, score) {
+            console.log(score.value)            
+            if (score.value != '') {
+                $(this).parent().children().unbind('mouseenter').unbind('mouseleave');
+            }
+        })
+    </script>
+    <style>
+    @@keyframes rotate360 {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .rotate-animation {
+        animation: rotate360 1s linear infinite;
+    }
+</style>
+}
+
+

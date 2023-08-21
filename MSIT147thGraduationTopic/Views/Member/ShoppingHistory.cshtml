@@ -1,0 +1,45 @@
+﻿@using MSIT147thGraduationTopic.ViewComponents;
+@{
+    ViewData["Title"] = "購物紀錄";
+}
+
+<div class="text-center mb-4">
+    <h1 class="fw-bold mt-4">購物紀錄</h1>
+</div>
+<div class="row" style="--bs-gutter-x:0;">
+    <div class="col-lg-2 offset-1">
+        @await Component.InvokeAsync(nameof(SidebarVC))
+    </div>
+    <div class="col-lg-5 offset-1 fs-4">
+        <div class="border px-4 py-2 mb-3">
+            <label class="mb-1">訂單時間</label>
+            <div class="input-group mb-3">
+                <span class="input-group-text">自</span>
+                <input type="date" id="queryStartDate" class="form-control">
+                <span class="input-group-text">至</span>
+                <input type="date" id="queryEndDate" class="form-control">
+            </div>
+            @*<label class="mb-1">購買商品</label>
+            <div class="input-group mb-3">
+                <input type="text" class="form-control">
+            </div>*@
+            <button class="btn btn-primary" type="button" id="btnQuery" disabled>查詢</button>
+        </div>
+        <p class="infotext mb-1"></p>
+        <div class="orderTables">
+
+        </div>        
+        
+    </div>
+</div>
+
+@section Styles{
+    <style>
+        
+    </style>
+}
+
+@section Scripts{
+    <script src="~/js/Member/shoppingHistory.js"></script>
+
+}

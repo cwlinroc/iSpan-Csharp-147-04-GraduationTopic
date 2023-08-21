@@ -1,0 +1,208 @@
+﻿@{
+    ViewData["Title"] = "銷售統計";
+    Layout = "_BackstagePage";
+}
+
+
+
+<div class="container mt-5">
+    <div class="row">
+
+        <div class="px-3 col-lg-8">
+
+
+            <div class="p-4 bg-white rounded shadow ">
+                <h2 class="mt-2">商品銷售表</h2>
+                <div class="mt-3 ms-2">
+                    <button class="btn btn-sm btn-primary" id="btnAccordingToCategory">類別</button>
+                    <button class="btn btn-sm btn-outline-primary" id="btnAccordingToPet">動物</button>
+                    <button class="btn btn-sm btn-outline-primary" id="btnAccordingToBrand">品牌</button>
+                </div>
+                <div class="p-5" style="height:600px">
+                    <canvas id="mainChart" width="500" height="300"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="px-3 col-lg-4">
+            <div class="p-4 bg-white rounded shadow ">
+
+                <h3>銷售最佳商品</h3>
+                <div class="p-2 mt-2">
+                    <div class="my-auto" style="height:450px">
+                        <canvas id="dougnutChart" width="300" height="300"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-1 p-2">
+                    <label for="selectDaysBefore" class="fs-4 mb-2">時間:</label>
+                    <select class="form-select mb-3" id="selectDaysBefore">
+                        <option value="7300" selected>不限</option>
+                        <option value="7">七天內</option>
+                        <option value="30">一個月內</option>
+                        <option value="90">三個月內</option>
+                    </select>
+                    <label for="selectMeasureUnit" class="fs-4 mb-2">統計單位:</label>
+                    <select class="form-select mb-3" id="selectMeasureUnit">
+                        <option value="quantity" selected>購買數</option>
+                        <option value="profit">銷售額</option>
+                    </select>
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+@section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let measurement = 'category' // animal
+        let classification = 'quantity' // profit
+        let daysBefore = '3650'
+
+
+
+        const ctxMain = document.getElementById('mainChart').getContext('2d');
+        const ctxDoughnut = document.getElementById('dougnutChart').getContext('2d');
+        const mainChart = new Chart(ctxMain, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '',
+                    data: [],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        })
+        const doughnutChart = new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    '品牌1',
+                    '品牌2',
+                    '品牌3'
+                ],
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: [300, 50, 100],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)'
+                    ],
+                    hoverOffset: 4
+                }]
+            }
+        })
+
+        $('#btnAccordingToCategory').click(e => {
+            measurement = 'category'
+            btnDisplay(e.currentTarget)
+        })
+        $('#btnAccordingToPet').click(e => {
+            measurement = 'animal'
+            btnDisplay(e.currentTarget)
+        })
+        $('#btnAccordingToBrand').click(e => {
+            measurement = 'brand'
+            btnDisplay(e.currentTarget)
+        })
+        function btnDisplay(element) {
+            $(element).addClass('btn-primary').removeClass('btn-outline-primary')
+                .siblings().removeClass('btn-primary').addClass('btn-outline-primary')
+            updateChart()
+        }
+
+        //select change
+        $('#selectDaysBefore').change(async e => {
+            const val = $(e.currentTarget).val()
+            console.log(val)
+            daysBefore = val
+            updateChart()
+            updateDoughnut()
+        })
+        $('#selectMeasureUnit').change(async e => {
+            const val = $(e.currentTarget).val()
+            console.log(val)
+            classification = val
+            updateChart()
+            updateDoughnut()
+        })
+
+        //更新sales chart
+        updateChart()
+        async function updateChart() {
+            const data = await getSalesData()
+            mainChart.data.labels = data.labels
+            mainChart.data.datasets[0].data = data.data
+            mainChart.data.datasets[0].label = data.measurementUnit
+            mainChart.update()
+        }
+
+        //取得data
+        async function getSalesData() {
+            const response = await fetch(`${ROOT}/api/apistatistic/salechart?` +
+                `measurement=${measurement}&classification=${classification}&daysBefore=${daysBefore}`)
+            const data = await response.json()
+            console.log(data)
+            return data
+        }
+
+        //更新doughnut data
+        updateDoughnut()
+        async function updateDoughnut() {
+            const data = await getDoughnutData()
+            doughnutChart.data.labels = data.map(o => o.label)
+            doughnutChart.data.datasets = []
+            doughnutChart.data.datasets.push({
+                label: '銷售紀錄',
+                data: data.map(o=>o.data),
+                backgroundColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(255, 205, 86)',
+                    'rgb(54, 248, 60)',
+                    'rgb(54, 162, 235)',
+                    'rgb(247, 67, 192)',
+                ],
+                hoverOffset: 4
+            })
+            doughnutChart.update()
+        }        
+
+        //取得doughnut data
+        async function getDoughnutData() {
+            const response = await fetch(`${ROOT}/api/apistatistic/MostSalesMerchandises?` +
+                `classification=${classification}&daysBefore=${daysBefore}`)
+            const data = await response.json()
+            console.log(data)
+            return data
+        }
+
+    </script>
+}
+
+

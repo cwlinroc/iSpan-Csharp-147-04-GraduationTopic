@@ -1,0 +1,103 @@
+﻿@model MSIT147thGraduationTopic.Models.ViewModels.BrandVM
+
+@{
+    Layout = "_BackstagePage";
+    ViewData["Title"] = "編輯品牌資料";
+}
+
+<div class="container">
+    <h1 class="title">編輯品牌資料</h1>
+
+    <div class="bg-light rounded shadow p-5">
+        <h4>輸入品牌資料</h4>
+        <hr />
+        <div class="row">
+            <div class="col-md-4">
+                <form asp-action="Edit" method="Post" name="forminput" id="forminput">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="BrandId" />
+                    <div class="form-group">
+                        <label asp-for="BrandName" class="control-label"></label>
+                        <input asp-for="BrandName" class="form-control" id="input" />
+                        <span asp-validation-for="BrandName" class="text-danger" id="alertspan"></span>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <input type="submit" value="儲存變更" class="btn btn-primary" id="submit" />
+                        @Html.ActionLink("取消", "Index", "Brands", new { txtKeyword = ViewBag.txtKeyword,
+                        PageIndex = ViewBag.PageIndex, displayorder = ViewBag.displayorder }, new { @class = "btn btn-secondary" })
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- 驗證輸入 -->
+    <script>
+        const alertspan = document.querySelector("#alertspan");
+
+        const submit = document.querySelector("#submit");
+        submit.addEventListener("click", (event) => {
+            event.preventDefault();
+            var formdata = new FormData(document.forminput);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/ApiBrand/CheckBrandforEdit");
+            xhr.send(formdata);
+
+            let condition;
+            xhr.addEventListener("load", () => {
+                const data = JSON.parse(xhr.responseText);
+
+                if (data) {
+                    alertspan.innerHTML = "此品牌已存在，請重新命名";
+                }
+                else {
+                    alertspan.innerHTML = "";
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: '品牌資料修改成功！',
+                        showConfirmButton: false,
+                        timer: 800,
+                        allowOutsideClick: false
+                    }).then(() => {
+                        const forminput = document.querySelector("#forminput");
+                        HTMLFormElement.prototype.submit.call(forminput);
+                    })
+                }
+            })
+        })
+
+        const input = document.querySelector("#input");
+        input.addEventListener("keyup", () => {
+            var formdata = new FormData(document.forminput);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/ApiBrand/CheckBrandforEdit");
+            xhr.send(formdata);
+
+            xhr.addEventListener("load", () => {
+                const data = JSON.parse(xhr.responseText);
+
+                if (data) {
+                    alertspan.innerHTML = "此品牌已存在，請重新命名";
+                }
+                else {
+                    alertspan.innerHTML = "";
+                }
+            })
+        })
+    </script>
+}
+
+@section Styles{
+    <style>
+        .title {
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+    </style>
+}

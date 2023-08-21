@@ -1,0 +1,293 @@
+﻿@using Microsoft.AspNetCore.Http;
+@using System.Security.Claims;
+@inject IHttpContextAccessor HttpContextAccessor;
+@{
+    var user = HttpContextAccessor?.HttpContext?.User;
+    bool? isAuthorized = user?.Identity?.IsAuthenticated;
+    string? userName = string.Empty;
+    string? roleName = string.Empty;
+    string? avatarName = string.Empty;
+
+    if (isAuthorized ?? false)
+    {
+        userName = user?.Claims.FirstOrDefault(o => o.Type == "NickName")?.Value;
+        if (string.IsNullOrEmpty(userName))
+            userName = user?.Claims.FirstOrDefault(o => o.Type == "UserName")?.Value;
+        roleName = user?.FindFirstValue(ClaimTypes.Role);
+        avatarName = user?.FindFirstValue("AvatarName");
+        if (string.IsNullOrEmpty(avatarName))
+            avatarName = "memberDefault.png";
+    }
+
+    string? loadCoupon = HttpContextAccessor?.HttpContext?.Session.GetString("LoadCoupon");
+    if (!string.IsNullOrEmpty(loadCoupon) || loadCoupon == "Load")
+    {
+        HttpContextAccessor?.HttpContext?.Session.SetString("LoadCoupon", string.Empty);
+    }
+
+
+}
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="google" value="notranslate">
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>@ViewBag.Title - 福祿獸購物商城</title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="@Url.Content("~/images/blackcat.ico")" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- font-awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="~/css/styles.css" rel="stylesheet" />
+    <!-- sweetalert2 -->
+    <link href="~/css/sweetalert2.min.css" rel="stylesheet" />
+    <!-- Animate.css-->
+    <link href="~/css/animate.min.css" rel="stylesheet" />
+    <!-- AOS.css-->
+    <link href="~/css/aos.css" rel="stylesheet" />
+
+    <link href="~/css/mallPage.css" rel="stylesheet" />
+    @RenderSection("Styles",false)
+
+</head>
+
+<body class="d-flex flex-column h-100 bg-body">
+
+    <main class="flex-shrink-0">
+
+        <!-- 導覽列1 -->
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+            <div class="container px-5">
+                <a class="navbar-brand " href="@Url.Action("Index","Home")">
+                    <img class="me-3" src="~/images/icon40x40.png" alt="..." />
+                    Furry Store 福祿獸
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarHeaderContent" aria-controls="navbarHeaderContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarHeaderContent">
+                    <div class="nav-item flex-fill mx-5">
+                        <form class="d-flex me-3 my-3">
+                            <input id="navbar_input" class="form-control me-2 flex-fill" type="search" placeholder="請輸入關鍵字" aria-label="Search">
+                            <button id="navbar_search" class="btn btn-outline-light text-nowrap" type="submit">搜尋</button>
+                        </form>
+                    </div>
+
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        @{
+                            if (isAuthorized ?? false)
+                            {
+                                <img src="@Url.Content($"~/uploads/Avatar/{avatarName}")" id="navbarAvatar" class="rounded-circle ms-auto border border-4 border-secondary">
+                                <div class="navbar-nav ms-2">
+                                    <span class="navbar-text me-3 text-white">@userName</span>
+                                </div>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        功能選單
+                                    </a>
+                                    <ul class="dropdown-menu bg-dark" aria-labelledby="navbarDropdown">
+                                        <li class="dropdown-item">
+                                            <a class="nav-link text-nowrap" href="@Url.Action("MemberCenter","Member")">會員中心</a>
+                                        </li>
+                                        <li class="dropdown-item">
+                                            <a class="nav-link text-nowrap" href="@Url.Action("ShoppingHistory","Member")">購物紀錄</a>
+                                        </li>
+                                        <li class="dropdown-item">
+                                            <a class="nav-link text-nowrap" href="@Url.Action("CouponList","CouponFront")">優惠券列表</a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li class="dropdown-item">
+                                            <a class="nav-link text-nowrap" href="#" id="btnLogOut">登出</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Content("~/cart")">
+                                        <i class="fa-solid fa-cart-shopping text-light fs-4 mx-2 text-nowrap"></i>
+                                        <div class="d-inline  position-relative">
+                                            <div class="badge bg-danger rounded-circle position-absolute" id="cartCount">
+                                                <div class="position-absolute">0</div>
+                                            </div>
+                                        </div>
+
+                                        購物車
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-nowrap" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">登入</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-nowrap" href="@Url.Action("CreateMember","Member")">註冊</a>
+                                </li>
+
+                            }
+                        }
+                    </ul>
+                </div>
+
+            </div>
+        </nav>
+
+        <!-- Modal -->
+        <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog  modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-4 " id="loginModalLabel">登入</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body mb-4">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-10 mx-auto">
+
+                                    <form name="LoginForm">
+                                        @Html.AntiForgeryToken()
+                                        <!-- Account input-->
+                                        <div class="form-label mb-3">
+                                            <label for="loginAccount" class="fw-bold">帳號</label>
+                                            <input class="form-control" id="loginAccount" type="text" />
+                                        </div>
+                                        <!-- Password input-->
+                                        <div class="form-label mb-3">
+                                            <label for="loginPassword" class="fw-bold">密碼</label>
+                                            <input class="form-control" id="loginPassword" type="password" />
+                                        </div>
+                                        <div class="form-check form-check-inline mb-3">
+                                            <input class="form-check-input" type="checkbox" id="chkRemember">
+                                            <label class="form-check-label" for="chkRemember">
+                                                記住我
+                                            </label>
+                                        </div>
+                                        <span class="offset-6"><a style="text-decoration:none" href="@Url.Action("ForgetPwd","Member")">忘記密碼</a></span>
+
+                                        <div>
+                                            <button type="button" class="btn btn-primary me-2" id="btnLogIn">登入</button>
+                                            <button type="button" class="btn btn-secondary" id="btnCancel" data-bs-dismiss="modal">取消</button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer justify-content-between">
+                        <div>
+                            <button type="button" id="demoMember88" class="mb-3 btn btn-outline-secondary btn-sm">demoMember88</button>
+                            <button type="button" id="demoMember99" class="mb-3 btn btn-outline-secondary btn-sm">demoMember99</button>
+                        </div>
+                        <div>
+                            <button type="button" id="demoAdmin" class="mb-3 btn btn-outline-secondary btn-sm">demoAdmin</button>
+                            <!--<button type="button" id="demoManager" class="mb-3 btn btn-outline-secondary btn-sm">demoManager</button>
+                            <button type="button" id="demoEmployee" class="mb-3 btn btn-outline-secondary btn-sm">demoEmployee</button>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 導覽列2-->
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container px-5">
+
+                <div class="collapse navbar-collapse justify-content-center" id="navbarHeaderContent">
+
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+                        <!--<li class="nav-item mx-4 px-3 text-nowrap"><a class="nav-link" href="@Url.Action("Index","Home")">優惠專區(未開通)</a></li>-->
+                        <li class="nav-item mx-4 px-3 text-nowrap"><a class="nav-link" href="@Url.Content("~/Mall/Index/?tagId=2")">狗狗商品</a></li>
+                        <li class="nav-item mx-4 px-3 text-nowrap"><a class="nav-link" href="@Url.Content("~/Mall/Index/?tagId=1")">貓咪商品</a></li>
+                        <li class="nav-item mx-4 px-3 text-nowrap"><a class="nav-link" href="@Url.Content("~/Mall/Index/?sideCategoryId=1")">狗貓零食</a></li>
+                        <li class="nav-item mx-4 px-3 text-nowrap"><a class="nav-link" href="@Url.Content("~/Mall/Index/?sideCategoryId=5")">器材工具</a></li>
+                        <li class="nav-item mx-4 px-3 text-nowrap"><a class="nav-link" href="@Url.Content("~/Mall/Index/?sideCategoryId=9")">外出用具</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </nav>
+
+
+
+
+        <div>
+            <!-- 內容區塊-->
+            @RenderBody()
+        </div>
+
+
+    </main>
+    <!-- Footer-->
+    <footer class="bg-dark py-4 mt-auto">
+        <div class="container px-5">
+            <div class="row align-items-center justify-content-between flex-column flex-sm-row">
+                <div class="col-auto">
+                    <div class="small m-0 text-white">Copyright &copy; 福祿獸購物商城</div>
+                </div>
+                <div class="col-auto">
+                    <a class="link-light small" href="#!">Privacy</a>
+                    <span class="text-white mx-1">&middot;</span>
+                    <a class="link-light small" href="#!">Terms</a>
+                    <span class="text-white mx-1">&middot;</span>
+                    <a class="link-light small" href="#!">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 讀取圖示start -->
+    <div class="loading-box position-fixed">
+        <div class="sk-cube-grid">
+            <div class="sk-cube sk-cube1"></div>
+            <div class="sk-cube sk-cube2"></div>
+            <div class="sk-cube sk-cube3"></div>
+            <div class="sk-cube sk-cube4"></div>
+            <div class="sk-cube sk-cube5"></div>
+            <div class="sk-cube sk-cube6"></div>
+            <div class="sk-cube sk-cube7"></div>
+            <div class="sk-cube sk-cube8"></div>
+            <div class="sk-cube sk-cube9"></div>
+        </div>
+    </div>
+    <!-- 讀取圖示end -->
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <!-- chart js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="~/js/sweetalert2.min.js"></script>
+    <!-- aos.js -->
+    <script src="~/js/aos.js"></script>
+    <script>AOS.init();</script>
+    <!-- 自訂custonAnimate -->
+    <script src="~/js/customAnimate.js"></script>
+
+    <script>const ROOT = '@Url.Content("~")'</script>
+    <script>const ROLE = '@roleName'</script>
+    <script>const LOADCOUPON = @((loadCoupon ?? "") == "Load" ? "true" : "false")</script>
+    <script src="~/js/mallPage.js"></script>
+
+    @RenderSection("Scripts",false)
+    @RenderSection("InlineScripts",false)
+
+</body>
+
+</html>

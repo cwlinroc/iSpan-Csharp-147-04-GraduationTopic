@@ -1,0 +1,386 @@
+﻿@model IEnumerable<MSIT147thGraduationTopic.Models.ViewModels.MerchandiseSearchVM>
+
+@{
+    Layout = "_BackstagePage";
+    ViewData["Title"] = "商品列表檢視";
+    int specdisplayorder = int.TryParse(Context.Request.Cookies["Spec_displayorder"], out int temp) ? temp : 0;
+}
+
+<div class="container">
+    <h1 class="title">商品列表檢視</h1>
+    <div style="float:right">
+        <button id="demo_keyword" class="btn btn-outline-secondary mx-2">Demo 關鍵字</button>
+        <button id="demo_noresult" class="btn btn-outline-secondary mx-2">Demo 無結果</button>
+    </div>
+
+    <div class="bg-light rounded shadow p-5">
+        <div>
+            @using (Html.BeginForm())
+            {
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <div class="input-group mb-3">
+                            <label class="input-group-text" for="searchCondition">選擇搜尋條件</label>
+                            <select class="form-select conditionname" name="searchCondition">
+                                <option value="1">商品名稱</option>
+                                <option value="2">規格名稱</option>
+                                <option value="3">品牌名稱</option>
+                                <option value="4">類別名稱</option>
+                            </select>
+                            <input type="text" id="search-input" name="txtKeyword" class="form-control" aria-label="Text input with dropdown button">
+                            <input type="submit" id="keywordsearch" value="Search" class="btn btn-secondary" />
+                        </div>
+                    </div>
+                    <!-- 排序方式 -->
+                    <div class="input-group" style="display: flex; justify-content: flex-end; max-width:250px">
+                        <label class="input-group-text" for="displayorder">排序依據</label>
+                        <select class="form-select" name="displayorder" id="displayorder" aria-label="Floating label select example">
+                            <option value="0">由新到舊</option>
+                            <option value="1">由舊到新</option>
+                            <option value="2">依名稱遞增</option>
+                            <option value="3">依名稱遞減</option>
+                        </select>
+                    </div>
+                    <!-- 每頁顯示筆數 -->
+                    <div class="d-flex select-limit js-select-limit ml-3 mb-3"
+                         style="white-space: nowrap; align-items: center; width:150px; float:right; border:solid 1px #D0D0D0; min-width:220px; border-radius:5px">
+                        每頁顯示 :
+                        <button type="button" class="btn btn-link pageSize" style="margin: -5px" value="10">10</button>
+                        <button type="button" class="btn btn-link pageSize" style="margin: -5px" value="20">20</button>
+                        <button type="button" class="btn btn-link pageSize" style="margin: -5px" value="50">50</button>
+                        筆
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <p>
+                @Html.ActionLink("新增商品", "Create", "Merchandises", null, new { @class = "btn btn-primary" })
+            </p>
+            <div class="form-group">
+                @Html.ActionLink("檢視商品類別", "Index", "Categories", null, new { @class = "btn btn-warning" })
+                @Html.ActionLink("檢視品牌清單", "Index", "Brands", null, new { @class = "btn btn-success" })
+            </div>
+        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        檢視序號
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.MerchandiseName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.BrandName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CategoryName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.ImageUrl)
+                    </th>
+                    <th style="text-align:center">
+                        @Html.DisplayNameFor(model => model.Display)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="showResult">
+                @{
+                    int count = 0;
+                    foreach (var item in Model)
+                    {
+                        count++;
+                        <tr>
+                            <td>
+                                @(count + ((ViewBag.PageIndex - 1) * ViewBag.pageSize))
+                            </td>
+                            <td style="max-width:150px">
+                                @Html.DisplayFor(modelItem => item.MerchandiseName)
+                            </td>
+                            <td style="width:150px">
+                                @Html.DisplayFor(modelItem => item.BrandName)
+                            </td>
+                            <td style="max-width:150px">
+                                @Html.DisplayFor(modelItem => item.CategoryName)
+                            </td>
+                            <td style="max-width:300px;">
+                                @{
+                                    string? thisDescription = item.Description;
+                                    if (thisDescription != null)
+                                    {
+                                        if (thisDescription.Length > 40)
+                                        {
+                                            thisDescription = thisDescription.Substring(0, 39) + "...";
+                                        }
+                                    }
+                                }
+                                @thisDescription
+                            </td>
+                            <td>
+                                @{
+                                    string imageurl = string.IsNullOrEmpty(item.ImageUrl) ? "default.png" : item.ImageUrl;
+                                }
+                                <img src="@Url.Content("~/uploads/merchandisePicture/" + imageurl)" class="imgtumbnail" />
+                            </td>
+                            <td style="text-align:center">
+                                @Html.DisplayFor(modelItem => item.Display)
+                            </td>
+                            <td>
+                                @Html.ActionLink("修改資料", "Edit", "Merchandises", new { id=item.MerchandiseId }, new { @class = "btn btn-warning" }) |
+                                @Html.ActionLink("檢視規格", "Index", "Specs", new { merchandiseid=item.MerchandiseId, displayorder=specdisplayorder }, new { @class = "btn btn-success" }) |
+                                <button class="btn btn-danger fordelete" data-merchandiseid="@item.MerchandiseId">刪除</button> |
+                                @Html.ActionLink("檢視評價", "Index", "Evaluations", new { merchandiseid=item.MerchandiseId }, new { @class = "btn btn-info" })
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <!-- 分頁 -->
+        <nav aria-label="Page navigation example ">
+            <ul class="pagination justify-content-center mt-4 " id="pagingContainer">
+                <!-- 透過Ajax產生分頁標籤 -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- DEMO按鈕 -->
+    <script>
+        $("#demo_keyword").on("click", (e) => {
+            e.preventDefault();
+            $("#search-input").val("貓");
+        })
+        $("#demo_noresult").on("click", (e) => {
+            e.preventDefault();
+            $("#search-input").val("室外小屋");
+        })
+    </script>
+    <!-- 搜尋商品按鈕 -->
+    <script>
+        // #region 呈現初始頁面
+        let txtKeyword = "@ViewBag.txtKeyword";
+        let searchCondition = @ViewBag.searchCondition;
+        let pageindex = @ViewBag.PageIndex;
+        let displayorder = @ViewBag.displayorder;
+        let pageSize = @ViewBag.pageSize;
+
+        //設定初值呈現
+        $(() => {
+            $(`.conditionname > option[value=${searchCondition}]`).attr("Selected", true);
+            $(`#displayorder > option[value=${displayorder}]`).attr("Selected", true);
+            $(`.pageSize[value="${pageSize}"]`).attr("style", "color: #4B0091; font-weight: bold; margin: -5px")
+        })
+        // #endregion
+
+        // #region 設定搜尋參數
+        //搜尋條件
+        $(".conditionname").on("change", (e) => {
+            searchCondition = $(".conditionname").val();
+        });
+        //關鍵字
+        $("#keywordsearch").on("click", (e) => {
+            txtKeyword = $("#search-input").val();
+            pageindex = 1;
+            e.preventDefault();
+            SearchProducts();
+        });
+        //排序方式
+        $("#displayorder").on("change", (e) => {
+            displayorder = $("#displayorder").val();
+            pageindex = 1;
+            SearchProducts();
+        });
+        //每頁顯示筆數
+        $(".pageSize").on("click", (e) => {
+            pageSize = $(e.currentTarget).val();
+            pageindex = 1;
+            SearchProducts();
+        });
+
+        //搜尋
+        function SearchProducts() {
+            window.location.href = `/Merchandises/Index/?txtKeyword=${txtKeyword}&searchCondition=${searchCondition}&PageIndex=${pageindex}&displayorder=${displayorder}&pageSize=${pageSize}`;
+        };
+        // #endregion
+
+        $(async () => {
+            // #region 產生分頁標籤
+            const responseforlength = await fetch(`@Url.Content("~/ApiMerchandise/GetSearchResultLength/")?txtKeyword=${"@ViewBag.txtKeyword"}&searchCondition=${@ViewBag.searchCondition}`);
+            const returnLengthBag = await responseforlength.text();
+            const resultLength = JSON.parse(returnLengthBag);
+            const totalpage = Math.ceil(resultLength / pageSize);
+            const pagingContainer = document.querySelector("#pagingContainer");
+
+            let indexRow = `<li class="page-item border-light toPrevious">\
+                                        <a class="page-link" href="#" aria-label="Previous">\
+                                            <span aria-hidden="true">&laquo;</span>\
+                                        </a>\
+                                    </li>`;
+            let indexArray = "";
+            let start, end;
+            if (totalpage <= 5) {
+                start = 1; end = totalpage;
+                for (var i = start; i <= end; i++) {
+                    indexArray += `<li class="page-item showIndex" val-index="${i}"><a class="page-link" href="#">${i}</a></li>`;
+                }
+            }
+            if (totalpage > 5) {
+                if (pageindex < 4) {
+                    start = 1; end = 5;
+                    for (var i = start; i <= end; i++) {
+                        indexArray += `<li class="page-item showIndex" val-index="${i}"><a class="page-link" href="#">${i}</a></li>`;
+                    }
+                    indexArray += `<li class="page-item"><a class="page-link" >...</a></li>`
+                }
+                if (pageindex == 4) {
+                    start = 2; end = 6;
+                    for (var i = start; i <= end; i++) {
+                        indexArray += `<li class="page-item showIndex" val-index="${i}"><a class="page-link" href="#">${i}</a></li>`;
+                    }
+                    indexArray += `<li class="page-item"><a class="page-link" >...</a></li>`
+                }
+                if (pageindex > 4) {
+                    if (pageindex + 3 <= totalpage) {
+                        start = pageindex - 2; end = parseInt(pageindex) + 2;//未轉型會默認為字串串接
+                        indexArray += `<li class="page-item showIndex" val-index="1"><a class="page-link" href="#">1</a></li>`
+                            + `<li class="page-item"><a class="page-link" >...</a></li>`
+                        for (var i = start; i <= end; i++) {
+                            indexArray += `<li class="page-item showIndex" val-index="${i}"><a class="page-link" href="#">${i}</a></li>`;
+                        }
+                        indexArray += `<li class="page-item"><a class="page-link" >...</a></li>`
+                    }
+                    if (pageindex + 3 > totalpage) {
+                        start = pageindex - 2; end = totalpage;
+                        indexArray += `<li class="page-item showIndex" val-index="1"><a class="page-link" href="#">1</a></li>`
+                            + `<li class="page-item"><a class="page-link" >...</a></li>`
+                        for (var i = start; i <= end; i++) {
+                            indexArray += `<li class="page-item showIndex" val-index="${i}"><a class="page-link" href="#">${i}</a></li>`;
+                        }
+                    }
+                }
+            }
+
+            indexRow += indexArray + `<li class="page-item toNext">
+                                                <a class="page-link" href="#" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                             </li>`;
+            pagingContainer.innerHTML = indexRow;
+            // #endregion
+
+            // #region 分頁標籤按鈕
+            //改變當前頁籤格式
+            $(`[val-index=${pageindex}]`).attr("class", "page-item showIndex active");
+            //分頁點選+點選後
+            $(".showIndex").on("click", (e) => {
+                pageindex = $(e.currentTarget).attr("val-index");
+                SearchProducts();
+            })
+            //前後頁按鈕
+            $(".toPrevious").on("click", () => {
+                if (pageindex > 1) {
+                    pageindex--;
+                    SearchProducts();
+                }
+            })
+            $(".toNext").on("click", () => {
+                if (pageindex < totalpage) {
+                    pageindex++;
+                    SearchProducts();
+                }
+            })
+            // #endregion
+
+            // #region 查無符合資料
+            if (resultLength == 0) {
+                const showResult = document.querySelector("#showResult");
+                showResult.innerHTML = "<h4>找不到符合的商品</h4>";
+            }
+            // #endregion
+        })
+
+        // #region 刪除商品
+        $(".fordelete").click(async (e) => {
+            //權限驗證
+            if (!await validateRole('經理')) return
+            //if (!confirm('確定刪除商品嗎？')) return;
+            Swal.fire({
+                title: '確定刪除類別嗎？',
+                text: `刪除的資料無法復原！！建議修改商品展示設定即可！`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '確定刪除',
+                cancelButtonText: '取消！！',
+                allowOutsideClick: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const currentmerchandiseid = $(e.currentTarget).attr("data-merchandiseid");
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("GET", `/ApiMerchandise/CheckSpecforDeleteMerchandise/${currentmerchandiseid}`);
+                    xhr.send();
+
+                    xhr.addEventListener("load", () => {
+                        const data = JSON.parse(xhr.responseText);
+
+                        if (data) {
+                            //alert("商品中尚有規格資料，因此無法刪除");
+                            Swal.fire({
+                                icon: 'error',
+                                title: '刪除失敗',
+                                text: '商品中尚有規格資料！',
+                                allowOutsideClick: false
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                position: 'center',
+                                icon: 'success',
+                                title: '刪除成功！',
+                                showConfirmButton: false,
+                                timer: 800,
+                                allowOutsideClick: false
+                            }).then(() => {
+                                window.location.href = `/Merchandises/Delete/${currentmerchandiseid}`;
+                            })
+                        }
+                    })
+                }
+            })
+        })
+                    // #endregion
+    </script>
+}
+
+@section Styles{
+    <style>
+        .title {
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        .conditionname {
+            max-width: 120px;
+            min-width: 120px;
+        }
+
+        .imgtumbnail {
+            max-width: 70px;
+            min-width: 70px;
+        }
+
+        .pageSize {
+            text-decoration: none;
+        }
+    </style>
+}

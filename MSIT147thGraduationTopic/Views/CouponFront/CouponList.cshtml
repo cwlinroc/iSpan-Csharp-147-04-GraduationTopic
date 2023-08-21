@@ -1,0 +1,114 @@
+﻿@using MSIT147thGraduationTopic.Models.Dtos
+@using MSIT147thGraduationTopic.ViewComponents;
+@model IEnumerable<CouponUsedStatus>
+@{
+    ViewData["Title"] = "優惠券列表";
+    var data = Model;
+}
+
+<div class="text-center mb-4">
+    <h1 class="fw-bold mt-4">優惠券列表</h1>
+</div>
+<div class="row" style="--bs-gutter-x:0;">
+    <div class="col-lg-2 offset-1">
+        @await Component.InvokeAsync(nameof(SidebarVC))
+    </div>
+    <div class="col-lg-5 offset-1">
+        <div>
+            <div class="container px-5 my-5">
+                <table class="table table-dark table-hover" id="tabDiscount">
+                    <thead>
+                        <tr>
+                            <th scope="col">序號</th>
+                            <th scope="col">優惠券名稱</th>
+                            <th scope="col">開始日期</th>
+                            <th scope="col">結束日期</th>
+                            <th scope="col">狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td id="CouponId" scope="col">@item.CouponId</td>
+                                    <td id="CouponName" scope="col">@item.CouponName</td>
+                                    <td id="StartDate" scope="col">@item.CouponStartDate</td>
+                                    <td id="EndDate" scope="col">@item.CouponEndDate</td>
+                                    <td id="btnReceive" scope="col">
+                                        @if (item.UsedStatus == 1)
+                                        {
+                                            <button class="btn btn-primary btnReceive" type="button">領取</button>
+                                        }
+                                        else if (item.UsedStatus == 2)
+                                        {
+                                            @:可使用
+                                        }
+                                        else
+                                        {
+                                            @:已使用
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles{
+    <style>
+        #sidelist {
+            list-style-type: none;
+        }
+
+        .couponscript {
+            list-style-type: none;
+            padding-left: 0%;
+            text-align: left;
+        }
+
+        #pills-tab {
+            border-style: inset;
+        }
+
+        #pills-Discount-tab {
+            margin: 5px;
+        }
+
+        #pills-Rebate-tab {
+            margin: 5px;
+        }
+    </style>
+        }
+
+@section Scripts{
+    <script>
+        //#region 領取
+        $('.btnReceive').click(function () {
+            const couponId = $(this).closest("tr").find('#CouponId').text();
+
+            $.post({
+                url: "@Url.Content("~/api/apicoupon/couponreceive")",
+                dataType: "json",
+                data: JSON.stringify({ id: couponId }),
+                contentType: "application/json",
+                success: async result => {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '成功',
+                        text: '已領取優惠券',
+                    });
+                    window.location.reload();
+                },
+                error: err => { console.log(err) }
+            })
+        })
+        //#endregion
+    </script>
+}
+
